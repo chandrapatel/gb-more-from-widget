@@ -191,7 +191,9 @@ registerBlockType('gb/more-from-widget', {
 
 			var _this = _possibleConstructorReturn(this, (edit.__proto__ || Object.getPrototypeOf(edit)).apply(this, arguments));
 
-			var postsToShow = _this.props.attributes.postsToShow;
+			var _this$props$attribute = _this.props.attributes,
+			    postsToShow = _this$props$attribute.postsToShow,
+			    category = _this$props$attribute.category;
 
 
 			_this.state = {
@@ -205,9 +207,16 @@ registerBlockType('gb/more-from-widget', {
 				return _this.setState({ categories: categories });
 			});
 
-			//this.moreFromRequest = getMoreFromPosts( postsToShow );
+			if (category) {
+				_this.moreFromRequest = _getPosts({
+					'per_page': postsToShow,
+					'categories': category
+				});
 
-			//this.moreFromRequest.then( morePosts => this.setState( { morePosts } ) );
+				_this.moreFromRequest.then(function (morePosts) {
+					return _this.setState({ morePosts: morePosts });
+				});
+			}
 
 			_this.getPosts = _this.getPosts.bind(_this);
 
@@ -245,6 +254,7 @@ registerBlockType('gb/more-from-widget', {
 
 				var postToShowCurrent = this.props.attributes.postsToShow;
 				var postToShowNext = nextProps.attributes.postsToShow;
+				var category = nextProps.attributes.category;
 				var setAttributes = this.props.setAttributes;
 
 
@@ -253,7 +263,10 @@ registerBlockType('gb/more-from-widget', {
 				}
 
 				if (postToShowNext >= MIN_POSTS && postToShowNext <= MAX_POSTS) {
-					this.moreFromRequest = getMoreFromPosts(postToShowNext);
+					this.moreFromRequest = _getPosts({
+						'per_page': postToShowNext,
+						'categories': category
+					});
 
 					this.moreFromRequest.then(function (morePosts) {
 						return _this2.setState({ morePosts: morePosts });
@@ -299,6 +312,10 @@ registerBlockType('gb/more-from-widget', {
 				var _state = this.state,
 				    categories = _state.categories,
 				    morePosts = _state.morePosts;
+
+
+				var hasPosts = Array.isArray(morePosts) && morePosts.length;
+
 				var setAttributes = this.props.setAttributes;
 
 
@@ -344,11 +361,7 @@ registerBlockType('gb/more-from-widget', {
 					isActive: layout === 'grid'
 				}];
 
-				return [focus && wp.element.createElement(
-					BlockControls,
-					{ key: 'controls' },
-					wp.element.createElement(Toolbar, { controls: layoutControls })
-				), focus && wp.element.createElement(
+				var inspectorControls = focus && wp.element.createElement(
 					InspectorControls,
 					{ key: 'inspector' },
 					wp.element.createElement(
@@ -403,7 +416,7 @@ registerBlockType('gb/more-from-widget', {
 							return setAttributes({ columns: value });
 						},
 						min: 2,
-						max: Math.min(MAX_POSTS_COLUMNS, morePosts.length)
+						max: MAX_POSTS_COLUMNS
 					}),
 					wp.element.createElement(TextControl, {
 						label: __('Number of posts to show'),
@@ -415,7 +428,20 @@ registerBlockType('gb/more-from-widget', {
 							return _this4.changePostsToShow(value);
 						}
 					})
-				), wp.element.createElement(
+				);
+
+				if (!category) {
+					return [inspectorControls, wp.element.createElement(Placeholder, {
+						icon: 'admin-post',
+						label: __('Please select category')
+					})];
+				}
+
+				return [focus && wp.element.createElement(
+					BlockControls,
+					{ key: 'controls' },
+					wp.element.createElement(Toolbar, { controls: layoutControls })
+				), inspectorControls, wp.element.createElement(
 					'div',
 					{ className: this.props.className },
 					title && wp.element.createElement(

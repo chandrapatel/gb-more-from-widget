@@ -94,7 +94,7 @@ registerBlockType( 'gb/more-from-widget', {
 
 			super( ...arguments );
 
-			const { postsToShow } = this.props.attributes;
+			const { postsToShow, category } = this.props.attributes;
 
 			this.state = {
 				categories: [],
@@ -104,10 +104,15 @@ registerBlockType( 'gb/more-from-widget', {
 			this.categoriesRequest = getCategories();
 
 			this.categoriesRequest.then( categories => this.setState( { categories } ) );
+			
+			if ( category ) {
+				this.moreFromRequest = getPosts( {
+					'per_page': postsToShow,
+					'categories': category,
+				} );
 
-			//this.moreFromRequest = getMoreFromPosts( postsToShow );
-
-			//this.moreFromRequest.then( morePosts => this.setState( { morePosts } ) );
+				this.moreFromRequest.then( morePosts => this.setState( { morePosts } ) );
+			}
 			
 			this.getPosts = this.getPosts.bind( this );
 
@@ -136,6 +141,7 @@ registerBlockType( 'gb/more-from-widget', {
 		componentWillReceiveProps( nextProps ) {
 			const { postsToShow: postToShowCurrent } = this.props.attributes;
 			const { postsToShow: postToShowNext } = nextProps.attributes;
+			const { category } = nextProps.attributes;
 			const { setAttributes } = this.props;
 
 			if ( postToShowCurrent === postToShowNext ) {
@@ -143,7 +149,10 @@ registerBlockType( 'gb/more-from-widget', {
 			}
 
 			if ( postToShowNext >= MIN_POSTS && postToShowNext <= MAX_POSTS ) {
-				this.moreFromRequest = getMoreFromPosts( postToShowNext );
+				this.moreFromRequest = getPosts( {
+					'per_page': postToShowNext,
+					'categories': category,
+				} );
 
 				this.moreFromRequest
 					.then( morePosts => this.setState( { morePosts } ) );
@@ -175,6 +184,8 @@ registerBlockType( 'gb/more-from-widget', {
 
 		render() {
 			const { categories, morePosts } = this.state;
+
+			const hasPosts = Array.isArray( morePosts ) && morePosts.length;
 
 			const { setAttributes } = this.props;
 
@@ -212,6 +223,70 @@ registerBlockType( 'gb/more-from-widget', {
 				},
 			];
 
+			const inspectorControls = focus && (
+				<InspectorControls key="inspector">
+					<BlockDescription>
+						<p>{ __( 'Shows a list of posts.' ) }</p>
+					</BlockDescription>
+					<h3>{ __( 'More From Settings' ) }</h3>
+					<TextControl
+						label={ __( 'Title' ) }
+						type="text"
+						value={ title }
+						onChange={ ( value ) => setAttributes( { title: value } ) }
+					/>
+					<SelectControl
+						label={ __( 'Select Category' ) }
+						value={ category }
+						options={ [{value:'',label:'- Select -'}].concat( categories.map( ( category, cindex ) => ( {
+							value: category.id,
+							label: category.name,
+						} ) ) ) }
+						onChange={ ( value ) => this.getPosts( value ) }
+					/>
+					<ToggleControl
+						label={ __( 'Display post date' ) }
+						checked={ displayPostDate }
+						onChange={ this.toggleDisplayPostDate }
+					/>
+					{ layout === 'grid' &&
+					<ToggleControl
+						label={ __( 'Display post thumbnail' ) }
+						checked={ displayPostThumbnail }
+						onChange={ this.toggleDisplayPostThumbnail }
+					/>
+					}
+					{ layout === 'grid' &&
+						<RangeControl
+							label={ __( 'Columns' ) }
+							value={ columns }
+							onChange={ ( value ) => setAttributes( { columns: value } ) }
+							min={ 2 }
+							max={ MAX_POSTS_COLUMNS }
+						/>
+					}
+					<TextControl
+						label={ __( 'Number of posts to show' ) }
+						type="number"
+						min={ MIN_POSTS }
+						max={ MAX_POSTS }
+						value={ this.props.attributes.postsToShow }
+						onChange={ ( value ) => this.changePostsToShow( value ) }
+					/>
+				</InspectorControls>
+			);
+
+			if ( ! category ) {
+				return [
+					inspectorControls,
+					<Placeholder
+						icon="admin-post"
+						label={ __( 'Please select category' ) }
+					>
+					</Placeholder>
+				];
+			}
+
 			return [
 				focus && (
 					<BlockControls key="controls">
@@ -219,58 +294,7 @@ registerBlockType( 'gb/more-from-widget', {
 					</BlockControls>
 				),
 
-				focus && (
-					<InspectorControls key="inspector">
-						<BlockDescription>
-							<p>{ __( 'Shows a list of posts.' ) }</p>
-						</BlockDescription>
-						<h3>{ __( 'More From Settings' ) }</h3>
-						<TextControl
-							label={ __( 'Title' ) }
-							type="text"
-							value={ title }
-							onChange={ ( value ) => setAttributes( { title: value } ) }
-						/>
-						<SelectControl
-							label={ __( 'Select Category' ) }
-							value={ category }
-							options={ [{value:'',label:'- Select -'}].concat( categories.map( ( category, cindex ) => ( {
-								value: category.id,
-								label: category.name,
-							} ) ) ) }
-							onChange={ ( value ) => this.getPosts( value ) }
-						/>
-						<ToggleControl
-							label={ __( 'Display post date' ) }
-							checked={ displayPostDate }
-							onChange={ this.toggleDisplayPostDate }
-						/>
-						{ layout === 'grid' &&
-						<ToggleControl
-							label={ __( 'Display post thumbnail' ) }
-							checked={ displayPostThumbnail }
-							onChange={ this.toggleDisplayPostThumbnail }
-						/>
-						}
-						{ layout === 'grid' &&
-							<RangeControl
-								label={ __( 'Columns' ) }
-								value={ columns }
-								onChange={ ( value ) => setAttributes( { columns: value } ) }
-								min={ 2 }
-								max={ Math.min( MAX_POSTS_COLUMNS, morePosts.length ) }
-							/>
-						}
-						<TextControl
-							label={ __( 'Number of posts to show' ) }
-							type="number"
-							min={ MIN_POSTS }
-							max={ MAX_POSTS }
-							value={ this.props.attributes.postsToShow }
-							onChange={ ( value ) => this.changePostsToShow( value ) }
-						/>
-					</InspectorControls>
-				),
+				inspectorControls,
 				<div className={ this.props.className }>
 					{ title &&
 						<h3 className="more-from-title"> {title} </h3>
