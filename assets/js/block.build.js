@@ -144,11 +144,15 @@ registerBlockType('gb/more-from-widget', {
 
 	title: __('More From'),
 
+	description: __('Shows a list of posts.'),
+
 	icon: 'list-view',
 
 	category: 'widgets',
 
 	keywords: [__('more from')],
+
+	supportHTML: false,
 
 	attributes: {
 
@@ -364,15 +368,6 @@ registerBlockType('gb/more-from-widget', {
 				var inspectorControls = focus && wp.element.createElement(
 					InspectorControls,
 					{ key: 'inspector' },
-					wp.element.createElement(
-						BlockDescription,
-						null,
-						wp.element.createElement(
-							'p',
-							null,
-							__('Shows a list of posts.')
-						)
-					),
 					wp.element.createElement(
 						'h3',
 						null,

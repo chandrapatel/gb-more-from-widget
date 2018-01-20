@@ -49,11 +49,15 @@ registerBlockType( 'gb/more-from-widget', {
 
 	title: __( 'More From' ),
 
+	description: __( 'Shows a list of posts.' ),
+
 	icon: 'list-view',
 
 	category: 'widgets',
 
 	keywords: [ __( 'more from' ) ],
+
+	supportHTML: false,
 
 	attributes: {
 
@@ -225,9 +229,6 @@ registerBlockType( 'gb/more-from-widget', {
 
 			const inspectorControls = focus && (
 				<InspectorControls key="inspector">
-					<BlockDescription>
-						<p>{ __( 'Shows a list of posts.' ) }</p>
-					</BlockDescription>
 					<h3>{ __( 'More From Settings' ) }</h3>
 					<TextControl
 						label={ __( 'Title' ) }
