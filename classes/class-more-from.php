@@ -82,7 +82,7 @@ class More_From {
 	 *
 	 * @return bool|array
 	 */
-	protected function _get_more_from( $cat_id, $num_of_posts = 3 ) {
+	protected function get_more_from( $cat_id, $num_of_posts = 3 ) {
 
 		if ( empty( $cat_id ) || ! is_numeric( $cat_id ) ) {
 			return false;
@@ -112,7 +112,7 @@ class More_From {
 
 		register_block_type(
 			'gb/more-from-widget', [
-				'attributes' => [
+				'attributes'      => [
 					'title'                => [
 						'type'    => 'string',
 						'default' => __( 'More From', 'gb-more-from-widget' ),
@@ -158,13 +158,13 @@ class More_From {
 	 *
 	 * @return string Returns related posts content.
 	 */
-	function render_block( $attributes ) {
+	public function render_block( $attributes ) {
 
 		if ( empty( $attributes['category'] ) || ! is_numeric( $attributes['category'] ) ) {
 			return;
 		}
 
-		$more_posts = $this->_get_more_from( $attributes['category'], $attributes['postsToShow'] );
+		$more_posts = $this->get_more_from( $attributes['category'], $attributes['postsToShow'] );
 
 		$list_items_markup = '';
 

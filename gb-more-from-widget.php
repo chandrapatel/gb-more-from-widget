@@ -55,7 +55,7 @@ if ( ! is_plugin_active( 'gutenberg/gutenberg.php' ) ) {
 }
 
 // Load Related Posts Block.
-require_once( GBMF_DIR . '/classes/class-more-from-widget.php' );
+require_once( GBMF_DIR . '/classes/class-more-from.php' );
 
 
 
