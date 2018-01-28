@@ -41,17 +41,11 @@ class More_From {
 			filemtime( plugin_dir_path( __DIR__ ) . 'assets/js/block.build.js' )
 		);
 
-		wp_localize_script( 'gbmf-js', 'gbmfObject', [
-			'ajax_url'   => admin_url( 'admin-ajax.php' ),
-			'ajax_nonce' => wp_create_nonce( 'gbmf_nonce' ),
-			'post_id'    => $post->ID,
-		] );
-
 		wp_enqueue_style(
 			'gbmf-editor-style',
-			plugins_url( 'assets/css/editor.css', __DIR__ ),
+			plugins_url( 'assets/css/style.css', __DIR__ ),
 			[ 'wp-edit-blocks' ],
-			filemtime( plugin_dir_path( __DIR__ ) . 'assets/css/editor.css' )
+			filemtime( plugin_dir_path( __DIR__ ) . 'assets/css/style.css' )
 		);
 
 	}
